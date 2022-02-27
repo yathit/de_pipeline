@@ -15,6 +15,16 @@ We will use [Apache Airflow](https://airflow.apache.org/) for this data processi
 
 The initial data was downloaded into raw_zone and expected to have more data files everyday at 1 am.
 
+## Setup
+
+Setup Airflow
+
+```bash
+echo -e "AIRFLOW_UID=$(id -u)" > .env
+docker-compose up airflow-init
+```
+
+
 
 
 
