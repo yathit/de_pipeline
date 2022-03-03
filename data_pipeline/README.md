@@ -24,7 +24,11 @@ echo -e "AIRFLOW_UID=$(id -u)" > .env
 docker-compose up airflow-init
 ```
 
+To start the service
 
+    docker-compose up
+
+The `data_pipeline` task will run every day 1 am and process additional files `raw_data` folder and produce `result.csv` file in `cleansed_zone` folder. 
 
 
 

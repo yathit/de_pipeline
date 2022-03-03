@@ -11,29 +11,38 @@ from airflow.operators.python_operator import PythonOperator
 
 from datetime import datetime
 
-IN_PATH = 'raw_zone'
-OUT_PATH = os.path.join('cleansed_zone', 'result.csv')
+DATA_PATH = '/mnt/data'
 
 
-def process_name_price(datafile):
-    filepaths = [f for f in os.listdir(IN_PATH) if f.endswith('.csv')]
+def process_name_price():
+    process_name_price_with(DATA_PATH)
+
+
+def process_name_price_with(data_path):
+    in_path = os.path.join(data_path, 'raw_zone')
+    out_path = os.path.join(data_path, 'cleansed_zone', 'result.csv')
+    filepaths = [os.path.join(in_path, f) for f in os.listdir(in_path) if f.endswith('.csv')]
     df = pd.concat(map(pd.read_csv, filepaths))
 
     in_shape = df.shape
 
     outdf = df.copy()
-    # take last 2 space-delimited tokens as first and last name. assumes name field has at least 2 space-delimited tokens in string
-    outdf['firstname'] = outdf['name'].apply(lambda x: re.split(' ', x)[-2])
-    outdf['lastname'] = outdf['name'].apply(lambda x: re.split(' ', x)[-1])
-    # pandas automatically reads numeric column, removing prepended 0s
+
     # remove rows with no name
     outdf = outdf.loc[outdf['name'] != '']
+
+    # take last 2 space-delimited tokens as first and last name. assumes name field has at least 2 space-delimited tokens in string
+    parts = outdf['name'].str.split(' ', n=1, expand=True)
+    outdf['firstname'] = parts[0]
+    outdf['lastname'] = parts[1]
+
+    outdf['price'] = pd.to_numeric(outdf['price'], downcast="float", errors="coerce")
     # flag if price > 100
-    outdf['above_100'] = outdf['price'].apply(lambda x: 'true' if x > 100 else 'false')
+    outdf['above_100'] = outdf['price'].apply(lambda x: True if x > 100 else False)
 
     outdf = outdf[['firstname', 'lastname', 'price', 'above_100']]
     # write to output file
-    outdf.to_csv(OUT_PATH, index=False)
+    outdf.to_csv(out_path, index=False)
 
     outshape = outdf.shape
 
@@ -76,7 +85,6 @@ with DAG(
         },
 
 ) as dag:
-
     process_name_price_task = PythonOperator(
         # The task ID is what appears in the graph/tree view
         task_id="process_name_price",
@@ -93,6 +101,3 @@ with DAG(
     )
 
     t1 >> process_name_price_task
-
-
-
