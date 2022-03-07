@@ -9,6 +9,6 @@ Using the dataset from https://archive.ics.uci.edu/ml/datasets/Car+Evaluation, c
 
 ## Solution
 
-See (Car-Evaluation.ipynb)[Car-Evaluation.ipynb.pdf]
+See [solution detail](Car-Evaluation.ipynb.pdf)
 
 Prediction result: low
