@@ -8,5 +8,17 @@ Produce a system architecture diagram (e.g. Visio, Powerpoint) using any of the 
 
 ## Solution
 
+Workflow:
+
+1. AWS API Gateway serves as entry point for uploaded images from web application as well as sink for Kafka stream for other web application. 
+2. AWS API Gateway post images along with metadata to Lambda function
+3. Lambda function will
+* process metadata and write statistic to RedShift database 
+* put the image to S3 with 7-day lifecycle policy
+
+Assumption:
+* Performance will suffer with direct insert 
+
+
 
 
